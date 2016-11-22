@@ -105,8 +105,11 @@ public:
     
     void save(string filename);
     void load(string filename);
+    
+    vector<vector<double> > & getSamples(){return samples;}
 
 private:
+    bool checkSamples();
     
     KDTreeVectorOfVectorsAdaptor<vector<vector<double> >, double > *mat_index;
     vector<vector<double> > samples;

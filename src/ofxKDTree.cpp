@@ -16,26 +16,32 @@ void ofxKDTree::clear() {
     samples.clear();
 }
 
-void ofxKDTree::addPoint(vector<double> sample) {
-    samples.push_back(sample);
-}
-
-void ofxKDTree::constructKDTree() {
+bool ofxKDTree::checkSamples() {
     if (samples.size() == 0) {
         ofLog(OF_LOG_ERROR, "Error: no samples");
-        return;
+        return false;
     }
     dim = samples[0].size();
     for (auto s : samples) {
         if (s.size() != dim) {
             ofLog(OF_LOG_ERROR, "Error: samples don't all have the same size");
-            return;
+            return false;
         }
     }
-    mat_index = new KDTreeVectorOfVectorsAdaptor<vector<vector<double> >, double > (dim, samples, 10);
-    mat_index->index->buildIndex();
+    return true;
 }
-    
+
+void ofxKDTree::addPoint(vector<double> sample) {
+    samples.push_back(sample);
+}
+
+void ofxKDTree::constructKDTree() {
+    if (checkSamples()) {
+        mat_index = new KDTreeVectorOfVectorsAdaptor<vector<vector<double> >, double > (dim, samples, 64);
+        mat_index->index->buildIndex();
+    }
+}
+
 void ofxKDTree::getKNN(vector<double> query_pt, int k, vector<size_t> & indexes, vector<double> & dists) {
     indexes.resize(k);
     dists.resize(k);
@@ -55,12 +61,14 @@ void ofxKDTree::save(string filename) {
 }
 
 void ofxKDTree::load(string filename) {
-    const char * path = filename.c_str();
-    FILE *f = fopen(path, "rb");
-    if (!f) {
-        throw std::runtime_error("Error reading index file!");
+    if (checkSamples()) {
+        const char * path = filename.c_str();
+        FILE *f = fopen(path, "rb");
+        if (!f) {
+            throw std::runtime_error("Error reading index file!");
+        }
+        mat_index = new KDTreeVectorOfVectorsAdaptor<vector<vector<double> >, double > (dim, samples, 64);
+        mat_index->index->loadIndex(f);
+        fclose(f);
     }
-    mat_index = new KDTreeVectorOfVectorsAdaptor<vector<vector<double> >, double > (dim, samples, 10);
-    mat_index->index->loadIndex(f);
-    fclose(f);
 }
