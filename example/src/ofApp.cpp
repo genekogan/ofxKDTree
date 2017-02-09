@@ -39,7 +39,7 @@ void ofApp::setup(){
     kdTree.getKNN(query_pt, 3, indexes, dists);
     
     for (int i=0; i<3; i++) {
-        cout << "nearest point: "<<ofToString(samples[indexes[i]]) << " : distance " << dists[i] << endl;
+        cout << "nearest point: index "<<indexes[i]<<", "<<ofToString(samples[indexes[i]]) << " : distance " << dists[i] << endl;
     }
 }
 
